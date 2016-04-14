@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Brown Bag Lunch #1 - Rails 5</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/beige.css" id="theme">
+    <link rel="stylesheet" href="css/theme.custom.css">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section>
+          <h1>Rails 5</h1>
+          <h3>Brown Bag Lunch #1</h3>
+          <p>
+            <small>15/04/2016</small>
+          </p>
+        </section>
+
+        <section>
+          <section>
+            <h2>ActionCable</h2>
+          </section>
+          <section>
+            <h3>C'est quoi ?</h3>
+            <br>
+            <p>Framework d'intégration des WebSockets en Ruby</p>
+            <br>
+            <p>Permet d'élaborer des fonctionnalités temps-réel<br>au sein de Rails</p>
+          </section>
+          <section>
+            <h3>Comment ?</h3>
+            <br>
+            <p>Basé sur Redis pour ses fonctionalités de publish/subscribe</p>
+          </section>
+          <section>
+            <h3>Contrôleur</h3>
+            <br>
+            <pre>
+              <code class="ruby">
+           # app/controllers/comments_controller.rb
+
+           class CommentsController < ApplicationController
+             def create
+               @comment = Comment.create(comment_params)
+               @comment.save
+
+               ActionCable.server.broadcast 'comments',
+                comment: @comment.content
+               head :ok
+             end
+           end
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>Channel</h3>
+            <br>
+            <pre>
+              <code class="ruby">
+          # app/channels/comments_channel.rb
+
+          class CommentsChannel < ApplicationCable::Channel
+            def subscribed
+              stream_from 'comments'
+            end
+          end
+              </code>
+            </pre>
+          </section>
+          <section>
+            <h3>JavaScript</h3>
+            <br>
+            <pre>
+              <code class="js">
+  // app/assets/javascripts/channels/comments.js
+
+  App.comments = App.cable.subscriptions.create('CommentsChannel', {
+    received: function(data) {
+      return $('#comments').append(this.renderComment(data))
+    },
+    renderComment: function(data) {
+      return "<p>" + data.comment + "</p>"
+    }
+  })
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Rails API</h2>
+          </section>
+          <section>
+            <h3>C'est quoi ?</h3>
+            <br>
+            <p>Intégration nativement de rails-api dans le framework</p>
+          </section>
+          <section>
+            <h3>Comment ?</h3>
+            <br>
+            <p>
+              Permet de générer une application en tant qu'API et non application web
+            </p>
+            <br>
+            <p>
+               Supprime les couches inutiles comme l'asset pipeline et la gestion des vues
+            </p>
+          </section>
+          <section>
+            <h3>Quand ?</h3>
+            <br>
+            <p>
+              Utile pour les gros projets sous forme d'API pour bénéficier de la robustesse et des fonctionnalités du framework
+            </p>
+            <br>
+            <p>
+              Sans doute un mauvais choix pour un simple micro-service
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Turbolinks 3</h2>
+          </section>
+        </section>
+
+        <section>
+          <h2>Autres</h2>
+        </section>
+
+        <section>
+          <section>
+            <h2>ApplicationRecord</h2>
+            <br>
+            <p>
+              Utilisation d'une classe principale <code>ApplicationRecord</code>
+            </p>
+            <br>
+            <p>
+              Partager des comportement et éviter le monkeypatching sur <code>ActiveRecord::Base</code>
+            </p>
+          </section>
+          <section>
+            <h2>ApplicationRecord</h2>
+            <br>
+            <pre>
+              <code class="ruby">
+            # app/models/application_record.rb
+
+            class ApplicationRecord < ActiveRecord::Base
+              self.abstract_class = true
+            end
+
+
+
+            # app/models/post.rb
+
+            class Post < ApplicationRecord
+            end
+              </code>
+            </pre>
+          </section>
+        </section>
+
+        <section>
+          <h2><code>rake</code> / <code>rails</code></h2>
+          <br>
+          <p>L'appel des tâches rake est remplacé par la commande<br><code>$ rails</code></p>
+          <br>
+          <pre>
+            <code>
+                    # Avant : $ rake db:migrate
+
+                    $ rails db:migrate
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <section>
+            <h2>Améliorations du Test Runner</h2>
+            <br>
+            <p>
+              Possibilité d'exécuter un test en particulier à partir d'une ligne de code de la méthode en question
+            </p>
+            <p>
+              <code>$ rails test test/models/user.rb:27</code>
+            </p>
+            <br>
+            <p>
+              Existe en version multiple
+            </p>
+            <p>
+              <code>$ rails test test/models/user_test.rb:27 test/models/post_test.rb:42</code>
+            </p>
+          </section>
+          <section>
+            <h2>Améliorations du Test Runner</h2>
+            <br>
+            <p>
+              Amélioration de la stack d'erreur
+              <br>
+              <code>$ rails t -b</code>
+            </p>
+            <br>
+            <p>
+              Possibilité de stopper la suite de test dès le premier échec
+              <br>
+              <code>$ rails t -d</code>
+            </p>
+          </section>
+        </section>
+
+        <section>
+          <h2>Rendering</h2>
+          <br>
+          <p>Possibilité de rendre une vue ou un partial à l'extérieur d'un contrôleur</p>
+          <br>
+          <pre>
+            <code class="ruby">
+      OrdersController.render :show, assigns: { order: Order.last }
+
+      OrdersController.render :_form, locals: { order: Order.last }
+
+      OrdersController.render json: Order.all
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h2>Caching en mode développement</h2>
+          <br>
+          <p>
+            Rails 5 ne nécessite plus la modification de
+            <br>
+            <code>config/environments/development.rb</code>
+            <br>
+            puis le redémarrage du serveur pour active/désactiver le cache en développement.
+          </p>
+          <br>
+          <p>
+            Il suffit désormais de lancer la commande
+            <br>
+            $ rails dev:cache
+            <br>
+            lorsque le serveur est lancé pour activer/désactiver le cache
+          </p>
+        </section>
+
+        <section>
+          <h2>Big set warning</h2>
+          <br>
+          <p>
+            Lancer une alerte dans les logs si on récupère depuis ActiveRecord une grande quantité d'enregistrements
+          </p>
+          <br>
+          <pre>
+            <code class="ruby">
+  config.active_record.warn_on_records_fetched_greater_than = 1500
+
+  >> Post.all
+
+  => Query fetched 2000 Post records: SELECT "posts".* FROM "posts"
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <section>
+            <h2>Améliorations dans ActiveSupport</h2>
+            <p><code>Time#next_day</code></p>
+            <p><code>Time#prev_day</code></p>
+            <p><code>Time#next_week</code></p>
+            <p><code>Time#prev_week</code></p>
+            <p><code>Time#next_weekday</code></p>
+            <p><code>Time#prev_weekday</code></p>
+            <p><code>Time#on_weekend?</code></p>
+            <p><code>Time#on_weekday?</code></p>
+          </section>
+          <section>
+            <h2>Améliorations dans ActiveSupport</h2>
+            <br>
+            <p><code>Array#without</code></p>
+            <p><code>Array#second_to_last</code></p>
+            <p><code>Array#third_to_last</code></p>
+            <p><code>Integer#positive?</code></p>
+            <p><code>Integer#negative?</code></p>
+          </section>
+        </section>
+
+        <section>
+          <h1>?</h1>
+        </section>
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/zoom-js/zoom.js', async: true },
+          { src: 'plugin/notes/notes.js', async: true }
+        ]
+      });
+
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,37 @@
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  margin: 0 0 20px 0;
+  color: #b93131; }
+
+.reveal a:not(.image) {
+  color: #e31d1d; }
+
+.reveal a:not(.image):hover {
+  color: #e31d1d; }
+
+.reveal .roll span:after {
+  color: #fff;
+  background: #e31d1d; }
+
+.reveal .controls .navigate-left,
+.reveal .controls .navigate-left.enabled {
+  border-right-color: #b93131; }
+
+.reveal .controls .navigate-right,
+.reveal .controls .navigate-right.enabled {
+  border-left-color: #b93131; }
+
+.reveal .controls .navigate-up,
+.reveal .controls .navigate-up.enabled {
+  border-bottom-color: #b93131; }
+
+.reveal .controls .navigate-down,
+.reveal .controls .navigate-down.enabled {
+  border-top-color: #b93131; }
+
+.reveal .progress span {
+  background: #b93131; }
